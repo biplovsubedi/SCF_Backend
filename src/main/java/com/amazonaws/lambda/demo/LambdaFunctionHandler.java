@@ -18,7 +18,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestParams, Resp
 
 		try {
 			if(request==null) {
-				request = new RequestParams();
+				request = new RequestParams("1500000011");
 			}
 			String input = request.getCin();
 			context.getLogger().log("Input: " + input);
@@ -96,6 +96,11 @@ public class LambdaFunctionHandler implements RequestHandler<RequestParams, Resp
 		
 		context.getLogger().log(response.toString());
 		return response;
+<<<<<<< HEAD
+=======
+
+    }
+>>>>>>> master
 
     }
 
