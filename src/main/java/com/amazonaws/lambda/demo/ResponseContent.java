@@ -57,7 +57,7 @@ public class ResponseContent {
 	}
 
 	public boolean isValid() {
-		if (cin != "0") {
+		if (cin != "0" && (this.last_month != 0 || this.pending_payments != 0 || this.total_discounted != 0)) {
 			return true;
 		}
 		return false;

@@ -6,14 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.amazonaws.Response;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 public class LambdaFunctionHandler implements RequestHandler<RequestParams, ResponseContent> {
 
-	@Override
-	public ResponseContent handleRequest(RequestParams request, Context context) {
+    @Override
+    public ResponseContent handleRequest(RequestParams request, Context context) {
 
 		ResponseContent response = new ResponseContent();
 
@@ -36,7 +35,10 @@ public class LambdaFunctionHandler implements RequestHandler<RequestParams, Resp
 			String sql = null;
 
 			// input= "1500000014";
-			sql = "select sum(Invoice_Amount) as IA from scfdata where CIN=" + input;
+			sql = "select sum(INVOICE_AMOUNT) " + 
+					"from scfdata " + 
+					"where (INVOICE_STATUS='300')&&(PAYMENT_STATUS='1600')"
+					+"&&(DUE_DATE>NOW())&&(CIN=" + input+")";
 
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
@@ -45,11 +47,16 @@ public class LambdaFunctionHandler implements RequestHandler<RequestParams, Resp
 
 			while (rs.next()) {
 				response.setTotal_discounted(rs.getDouble(1));
-
+				
 			}
 
 			// SQL 2: To get last month discounted
-			sql = "select sum(Invoice_Amount) as IA from scfdata where CIN=" + input;
+			sql = "select sum(INVOICE_AMOUNT) " + 
+					"from scfdata " + 
+					"where (INVOICE_STATUS='900'||INVOICE_STATUS='175'||INVOICE_STATUS='400')" + 
+					"&&(PAYMENT_STATUS='1400'||PAYMENT_STATUS='1800')" + 
+					"&&(DUE_DATE>now()" + 
+					"&&(CIN=" + input +"))";
 
 			rs = stmt.executeQuery(sql);
 
@@ -60,7 +67,11 @@ public class LambdaFunctionHandler implements RequestHandler<RequestParams, Resp
 			}
 
 			// SQL 1: To get total discounted
-			sql = "select sum(Invoice_Amount) as IA from scfdata where CIN=" + input;
+			sql = "select sum(INVOICE_AMOUNT) " + 
+					"from scfdata " + 
+					"where (INVOICE_STATUS='300')&&(PAYMENT_STATUS='1600')" + 
+					"&&(DISCOUNTED_DATE > (NOW() - INTERVAL 1 MONTH))" + 
+					"&&(CIN=" + input +")";
 
 			rs = stmt.executeQuery(sql);
 
@@ -85,6 +96,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestParams, Resp
 		
 		context.getLogger().log(response.toString());
 		return response;
-	}
+
+    }
 
 }
